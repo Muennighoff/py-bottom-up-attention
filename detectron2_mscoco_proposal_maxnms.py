@@ -99,7 +99,6 @@ def doit(detector, raw_images):
         # Predict classes and boxes for each proposal.
         if args.weight == "vgattr":
             pred_class_logits, pred_attr_logits, pred_proposal_deltas = detector.model.roi_heads.box_predictor(feature_pooled)
-            print("SHAPES:", pred_attr_logits.shape, pred_class_logits.shape)
         else:
             pred_class_logits, pred_proposal_deltas = detector.model.roi_heads.box_predictor(feature_pooled) 
 
@@ -132,8 +131,6 @@ def doit(detector, raw_images):
             if args.weight == "vgattr":
                 max_attr_prob = max_attr_prob[ids].detach()
                 max_attr_label = max_attr_label[ids].detach()
-
-                print(max_attr_label.shape, probs.shape)
 
                 instances.attr_scores = max_attr_prob
                 instances.attr_classes = max_attr_label
@@ -305,6 +302,11 @@ def build_model():
     return detector
 
 if __name__ == "__main__":
+
+    # Attrs currently don't work with batchsize > 1
+    if args.weight == "vgattr":
+        args.batchsize = 1
+
     pathXid = load_image_ids(DATA_ROOT, args.split)     # Get paths and ids
     detector = build_model()
     extract_feat('../HM_%s.tsv' % args.split, detector, pathXid)
