@@ -49,11 +49,12 @@ def fast_rcnn_inference_single_image(
     print("B:", boxes.shape)
     num_bbox_reg_classes = boxes.shape[1] // 4
     # Convert to Boxes to use the `clip` function ...
-    boxes = Boxes(boxes.reshape(-1, 4))
+    boxes = Boxes(boxes.reshape(-1, 6))
     boxes.clip(image_shape)
     boxes = boxes.tensor.view(-1, num_bbox_reg_classes, 4)  # R x C x 4
-    
+
     print("B:", boxes.shape)
+
     # Select max scores
     max_scores, max_classes = scores.max(1)       # R x C --> R
     num_objs = boxes.size(0)
