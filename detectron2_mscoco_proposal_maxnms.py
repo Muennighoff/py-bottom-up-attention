@@ -97,7 +97,10 @@ def doit(detector, raw_images):
         feature_pooled = box_features.mean(dim=[2, 3])  # (sum_proposals, 2048), pooled to 1x1
         
         # Predict classes and boxes for each proposal.
-        pred_class_logits, pred_proposal_deltas = detector.model.roi_heads.box_predictor(feature_pooled) #####!!!!!!!!!!!!
+        if args.weight == "vgattr":
+            pred_class_logits, pred_attr_logits, pred_proposal_deltas = detector.model.roi_heads.box_predictor(feature_pooled)
+        else:
+            pred_class_logits, pred_proposal_deltas = detector.model.roi_heads.box_predictor(feature_pooled) 
         rcnn_outputs = FastRCNNOutputs(
             detector.model.roi_heads.box2box_transform,
             pred_class_logits,
@@ -250,6 +253,19 @@ def build_model():
         cfg.MODEL.RPN.NMS_THRESH = 0.7
         # Find a model from detectron2's model zoo. You can either use the https://dl.fbaipublicfiles.... url, or use the following shorthand
         cfg.MODEL.WEIGHTS = "http://nlp.cs.unc.edu/models/faster_rcnn_from_caffe.pkl"
+    ### GETATTRS ##
+    elif args.weight == 'vgattr':
+        cfg = get_cfg()
+        cfg.merge_from_file(os.path.join(D2_ROOT, "configs/VG-Detection/faster_rcnn_R_101_C4_attr_caffemaxpool.yaml") ##
+        cfg.MODEL.RPN.POST_NMS_TOPK_TEST = 300
+        cfg.MODEL.ROI_HEADS.NMS_THRESH_TEST = 0.6
+        cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.2
+        cfg.INPUT.MIN_SIZE_TEST = 600
+        cfg.INPUT.MAX_SIZE_TEST = 1000
+        cfg.MODEL.RPN.NMS_THRESH = 0.7
+        # VG Weight
+        cfg.MODEL.WEIGHTS = "http://nlp.cs.unc.edu/models/faster_rcnn_from_caffe_attr.pkl"
+
     else:
         assert False, "no this weight"
     detector = DefaultPredictor(cfg)
@@ -258,6 +274,6 @@ def build_model():
 if __name__ == "__main__":
     pathXid = load_image_ids(DATA_ROOT, args.split)     # Get paths and ids
     detector = build_model()
-    extract_feat('HM_%s.tsv' % args.split, detector, pathXid)
+    extract_feat('../HM_%s.tsv' % args.split, detector, pathXid)
 
     #extract_feat('data/mscoco_imgfeat/%s_d2obj36_batch.tsv' % args.split, detector, pathXid)
