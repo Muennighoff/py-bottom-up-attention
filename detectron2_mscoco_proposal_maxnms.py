@@ -99,7 +99,7 @@ def doit(detector, raw_images):
         # Predict classes and boxes for each proposal.
         if args.weight == "vgattr":
             pred_class_logits, pred_attr_logits, pred_proposal_deltas = detector.model.roi_heads.box_predictor(feature_pooled)
-            print(pred_attr_logits.shape)
+            print("SHAPES:", pred_attr_logits.shape, pred_class_logits.shape)
         else:
             pred_class_logits, pred_proposal_deltas = detector.model.roi_heads.box_predictor(feature_pooled) 
 
@@ -111,6 +111,7 @@ def doit(detector, raw_images):
             detector.model.roi_heads.smooth_l1_beta,
         )
         
+        ####
         if args.weight == "vgattr":
             attr_prob = pred_attr_logits[..., :-1].softmax(-1)
             max_attr_prob, max_attr_label = attr_prob.max(-1)
@@ -127,10 +128,13 @@ def doit(detector, raw_images):
                 )
                 if len(ids) >= MIN_BOXES:
                     break
+            #####
             if args.weight == "vgattr":
                 max_attr_prob = max_attr_prob[ids].detach()
                 max_attr_label = max_attr_label[ids].detach()
-                
+
+                print(max_attr_label.shape, probs.shape)
+
                 instances.attr_scores = max_attr_prob
                 instances.attr_classes = max_attr_label
 
