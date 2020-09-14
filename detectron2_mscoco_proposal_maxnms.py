@@ -99,8 +99,10 @@ def doit(detector, raw_images):
         # Predict classes and boxes for each proposal.
         if args.weight == "vgattr":
             pred_class_logits, pred_attr_logits, pred_proposal_deltas = detector.model.roi_heads.box_predictor(feature_pooled)
+            print(pred_attr_logits.shape)
         else:
             pred_class_logits, pred_proposal_deltas = detector.model.roi_heads.box_predictor(feature_pooled) 
+
         rcnn_outputs = FastRCNNOutputs(
             detector.model.roi_heads.box2box_transform,
             pred_class_logits,
@@ -124,6 +126,12 @@ def doit(detector, raw_images):
             instances_list.append(instances)
             ids_list.append(ids)
         
+        #if args.weight == "vgattr":
+        #    attr_prob = pred_attr_logits[..., :-1].softmax(-1)
+        #    max_attr_prob, max_attr_label = attr_prob.max(-1)
+        #    instances.attr_scores = max_attr_prob
+        #    instances.attr_classes = max_attr_label
+
         # Post processing for features
         features_list = feature_pooled.split(rcnn_outputs.num_preds_per_image) # (sum_proposals, 2048) --> [(p1, 2048), (p2, 2048), ..., (pn, 2048)]
         roi_features_list = []
@@ -154,18 +162,33 @@ def dump_features(writer, detector, pathXid):
 
         num_objects = len(instances)
 
-        item = {
-            "img_id": img_id,
-            "img_h": img.shape[0],
-            "img_w": img.shape[1], 
-            "objects_id": base64.b64encode(instances.pred_classes.numpy()).decode(),  # int64
-            "objects_conf": base64.b64encode(instances.scores.numpy()).decode(),  # float32
-            "attrs_id": base64.b64encode(np.zeros(num_objects, np.int64)).decode(),  # int64
-            "attrs_conf": base64.b64encode(np.zeros(num_objects, np.float32)).decode(),  # float32
-            "num_boxes": num_objects,
-            "boxes": base64.b64encode(instances.pred_boxes.tensor.numpy()).decode(),  # float32
-            "features": base64.b64encode(features.numpy()).decode()  # float32
-        }
+        if args.weight == "vgattr":
+            item = {
+                "img_id": img_id,
+                "img_h": img.shape[0],
+                "img_w": img.shape[1], 
+                "objects_id": base64.b64encode(instances.pred_classes.numpy()).decode(),  # int64
+                "objects_conf": base64.b64encode(instances.scores.numpy()).decode(),  # float32
+                "attrs_id": base64.b64encode(instances.attr_classes.numpy()).decode(),  # int64
+                "attrs_conf": base64.b64encode(instances.attr_scores.numpy()).decode(),  # float32
+                "num_boxes": num_objects,
+                "boxes": base64.b64encode(instances.pred_boxes.tensor.numpy()).decode(),  # float32
+                "features": base64.b64encode(features.numpy()).decode()  # float32
+            }
+        
+        else:
+            item = {
+                "img_id": img_id,
+                "img_h": img.shape[0],
+                "img_w": img.shape[1], 
+                "objects_id": base64.b64encode(instances.pred_classes.numpy()).decode(),  # int64
+                "objects_conf": base64.b64encode(instances.scores.numpy()).decode(),  # float32
+                "attrs_id": base64.b64encode(np.zeros(num_objects, np.int64)).decode(),  # int64
+                "attrs_conf": base64.b64encode(np.zeros(num_objects, np.float32)).decode(),  # float32
+                "num_boxes": num_objects,
+                "boxes": base64.b64encode(instances.pred_boxes.tensor.numpy()).decode(),  # float32
+                "features": base64.b64encode(features.numpy()).decode()  # float32
+            }
 
         writer.writerow(item)
     
