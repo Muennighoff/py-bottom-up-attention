@@ -256,7 +256,7 @@ def build_model():
     ### GETATTRS ##
     elif args.weight == 'vgattr':
         cfg = get_cfg()
-        cfg.merge_from_file(os.path.join(D2_ROOT, "configs/VG-Detection/faster_rcnn_R_101_C4_attr_caffemaxpool.yaml") ##
+        cfg.merge_from_file(os.path.join(D2_ROOT, "configs/VG-Detection/faster_rcnn_R_101_C4_attr_caffemaxpool.yaml")) ##
         cfg.MODEL.RPN.POST_NMS_TOPK_TEST = 300
         cfg.MODEL.ROI_HEADS.NMS_THRESH_TEST = 0.6
         cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.2
