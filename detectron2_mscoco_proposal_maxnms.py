@@ -111,6 +111,10 @@ def doit(detector, raw_images):
             detector.model.roi_heads.smooth_l1_beta,
         )
         
+        if args.weight == "vgattr":
+            attr_prob = pred_attr_logits[..., :-1].softmax(-1)
+            max_attr_prob, max_attr_label = attr_prob.max(-1)
+
         # Fixed-number NMS
         instances_list, ids_list = [], []
         probs_list = rcnn_outputs.predict_probs()
@@ -123,16 +127,16 @@ def doit(detector, raw_images):
                 )
                 if len(ids) >= MIN_BOXES:
                     break
+            if args.weight == "vgattr":
+                max_attr_prob = max_attr_prob[ids].detach()
+                max_attr_label = max_attr_label[ids].detach()
+                
+                instances.attr_scores = max_attr_prob
+                instances.attr_classes = max_attr_label
+
             instances_list.append(instances)
             ids_list.append(ids)
         
-        if args.weight == "vgattr":
-            attr_prob = pred_attr_logits[..., :-1].softmax(-1)
-            print(attr_prob.shape)
-            max_attr_prob, max_attr_label = attr_prob.max(-1)
-            print("MAX:", max_attr_prob.shape, max_attr_label.shape)
-            instances.attr_scores = max_attr_prob
-            instances.attr_classes = max_attr_label
 
         # Post processing for features
         features_list = feature_pooled.split(rcnn_outputs.num_preds_per_image) # (sum_proposals, 2048) --> [(p1, 2048), (p2, 2048), ..., (pn, 2048)]
