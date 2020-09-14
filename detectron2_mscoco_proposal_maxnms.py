@@ -309,6 +309,6 @@ if __name__ == "__main__":
 
     pathXid = load_image_ids(DATA_ROOT, args.split)     # Get paths and ids
     detector = build_model()
-    extract_feat('../HM_%s.tsv' % args.split, detector, pathXid)
+    extract_feat('../../HM_%s.tsv' % args.split, detector, pathXid)
 
     #extract_feat('data/mscoco_imgfeat/%s_d2obj36_batch.tsv' % args.split, detector, pathXid)
