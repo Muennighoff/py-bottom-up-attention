@@ -28,7 +28,7 @@ from detectron2.modeling.roi_heads.fast_rcnn import FastRCNNOutputLayers, FastRC
 D2_ROOT = os.path.dirname(os.path.dirname(detectron2.__file__)) # Root of detectron2
 #DATA_ROOT = os.getenv('COCO_IMG_ROOT', '/ssd-playpen/data/mscoco/images/')
 DATA_ROOT = os.getenv("IMG", "../../input/fbmdatanopw/data/")
-MIN_BOXES = 10#36
+MIN_BOXES = 100#36
 MAX_BOXES = 100#36
 
 parser = argparse.ArgumentParser()
