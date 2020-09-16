@@ -28,8 +28,6 @@ from detectron2.modeling.roi_heads.fast_rcnn import FastRCNNOutputLayers, FastRC
 D2_ROOT = os.path.dirname(os.path.dirname(detectron2.__file__)) # Root of detectron2
 #DATA_ROOT = os.getenv('COCO_IMG_ROOT', '/ssd-playpen/data/mscoco/images/')
 DATA_ROOT = os.getenv("IMG", "../../input/fbmdatanopw/data/")
-MIN_BOXES = 72#36
-MAX_BOXES = 72#36
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--split', default='train2014', help='train2014, val2014')
@@ -37,6 +35,10 @@ parser.add_argument('--batchsize', default=4, type=int, help='batch_size')
 parser.add_argument('--model', default='res5', type=str, help='options: "res4", "res5"; features come from)')
 parser.add_argument('--weight', default='vg', type=str, 
         help='option: mask, obj, vg. mask:mask_rcnn on COCO, obj: faster_rcnn on COCO, vg: faster_rcnn on Visual Genome')
+
+parser.add_argument('--minboxes', default=72, type=int, help='minboxes')
+parser.add_argument('--maxboxes', default=72, type=int, help='maxboxes')
+
 
 args = parser.parse_args()
 
@@ -306,6 +308,9 @@ if __name__ == "__main__":
     # Attrs currently don't work with batchsize > 1
     if args.weight == "vgattr":
         args.batchsize = 1
+
+    MIN_BOXES = args.minboxes#36
+    MAX_BOXES = args.maxboxes#72#36
 
     pathXid = load_image_ids(DATA_ROOT, args.split)     # Get paths and ids
     detector = build_model()
