@@ -27,8 +27,8 @@ from detectron2.modeling.roi_heads.fast_rcnn import FastRCNNOutputLayers, FastRC
 
 D2_ROOT = os.path.dirname(os.path.dirname(detectron2.__file__)) # Root of detectron2
 #DATA_ROOT = os.getenv('COCO_IMG_ROOT', '/ssd-playpen/data/mscoco/images/')
-DATA_ROOT = os.getenv("IMG", "../input/fbmdatafinal/fbmdatafinal/data/")
-#DATA_ROOT = os.getenv("IMG", "../")
+#DATA_ROOT = os.getenv("IMG", "../input/fbmdatafinal/fbmdatafinal/data/")
+#DATA_ROOT = os.getenv("IMG", "./data/")
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--split', default='train2014', help='train2014, val2014')
@@ -39,12 +39,13 @@ parser.add_argument('--weight', default='vg', type=str,
 
 parser.add_argument('--minboxes', default=50, type=int, help='minboxes')
 parser.add_argument('--maxboxes', default=50, type=int, help='maxboxes')
-
+parser.add_argument('--dataroot', default='./data/', type=str, help="Path to data root; expects an img folder in the root")
 
 args = parser.parse_args()
 
 from torchvision.ops import nms
 from detectron2.structures import Boxes, Instances
+
 def fast_rcnn_inference_single_image(
     boxes, scores, image_shape, score_thresh, nms_thresh, topk_per_image
 ):
@@ -310,16 +311,18 @@ if __name__ == "__main__":
     if args.weight == "vgattr":
         args.batchsize = 1
 
-    MIN_BOXES = args.minboxes#36
-    MAX_BOXES = args.maxboxes#72#36
+    DATA_ROOT = os.getenv("IMG", args.dataroot)
+
+    MIN_BOXES = args.minboxes
+    MAX_BOXES = args.maxboxes
 
     pathXid = load_image_ids(DATA_ROOT, args.split)     # Get paths and ids
     detector = build_model()
-    extract_feat('../HM_%s.tsv' % args.split, detector, pathXid)
-
-    #extract_feat('data/mscoco_imgfeat/%s_d2obj36_batch.tsv' % args.split, detector, pathXid)
-
+    #extract_feat('../HM_%s.tsv' % args.split, detector, pathXid)
+    extract_feat('../HM_{}{}{}.tsv'.format(args.weight, args.minboxes, args.maxboxes), detector, pathXid)
 
 ## NOTES:
-# Sometimes failes imports depending on the GPU machine (exit code 1)
-# Phaps Solution at https://github.com/facebookresearch/maskrcnn-benchmark/issues/25
+# Sometimes fails imports depending on the GPU machine
+# > You need to make sure cublas is accessible as we are using caffee:
+# Copy Cublas to the 10.1 cuda which is in fact used
+# !cp -r /usr/local/cuda-10.2/include/*  /usr/local/cuda-10.1/include/
