@@ -1,3 +1,11 @@
+# PREFACE (Muennighoff)
+This repository has been copied from https://github.com/airsplay/py-bottom-up-attention and adapted for the following:
+- Include vgattr extraction script
+- Some small argparse changes, added a data folder where the img folder is to be placed
+
+All the credit goes to airsplay for putting in the hours to set up this repo, the setup.py of this repo is the craziest setup I have ever seen and after it spits out its 1000 lines of output I am surprised this even works every time. Refer to SCORE_REPRO on how to use feature extraction within vilio.
+Below follows the original README. 
+
 # Bottom-up Attention with Detectron2 
 
 The detectron2 system with **exactly the same model and weight** as the Caffe VG Faster R-CNN provided in [bottom-up-attetion](https://github.com/peteanderson80/bottom-up-attention).
