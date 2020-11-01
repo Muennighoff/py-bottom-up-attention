@@ -319,7 +319,7 @@ if __name__ == "__main__":
     pathXid = load_image_ids(DATA_ROOT, args.split)     # Get paths and ids
     detector = build_model()
     #extract_feat('../HM_%s.tsv' % args.split, detector, pathXid)
-    output_path = os.path.join(args.dataroot, './dataHM_{}{}{}.tsv'.format(args.weight, args.minboxes, args.maxboxes))
+    output_path = os.path.join(args.dataroot, './HM_{}{}{}.tsv'.format(args.weight, args.minboxes, args.maxboxes))
     extract_feat(output_path, detector, pathXid)
 
 ## NOTES:
