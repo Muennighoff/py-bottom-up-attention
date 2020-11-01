@@ -27,8 +27,6 @@ from detectron2.modeling.roi_heads.fast_rcnn import FastRCNNOutputLayers, FastRC
 
 D2_ROOT = os.path.dirname(os.path.dirname(detectron2.__file__)) # Root of detectron2
 #DATA_ROOT = os.getenv('COCO_IMG_ROOT', '/ssd-playpen/data/mscoco/images/')
-#DATA_ROOT = os.getenv("IMG", "../input/fbmdatafinal/fbmdatafinal/data/")
-#DATA_ROOT = os.getenv("IMG", "./data/")
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--split', default='train2014', help='train2014, val2014')
@@ -301,7 +299,7 @@ def build_model():
         cfg.MODEL.WEIGHTS = "http://nlp.cs.unc.edu/models/faster_rcnn_from_caffe_attr.pkl"
 
     else:
-        assert False, "no this weight"
+        assert False, "Specified weight does not exist"
     detector = DefaultPredictor(cfg)
     return detector
 
@@ -318,12 +316,12 @@ if __name__ == "__main__":
 
     pathXid = load_image_ids(DATA_ROOT, args.split)     # Get paths and ids
     detector = build_model()
-    #extract_feat('../HM_%s.tsv' % args.split, detector, pathXid)
+    
     output_path = os.path.join(args.dataroot, './HM_{}{}{}.tsv'.format(args.weight, args.minboxes, args.maxboxes))
     extract_feat(output_path, detector, pathXid)
 
 ## NOTES:
-# Sometimes fails imports depending on the GPU machine
+# Sometimes fails setup depending on the GPU machine
 # > You need to make sure cublas is accessible as we are using caffee:
 # Copy Cublas to the 10.1 cuda which is in fact used
 # !cp -r /usr/local/cuda-10.2/include/*  /usr/local/cuda-10.1/include/
